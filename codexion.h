@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/04 22:57:30 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/05 16:46:31 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,12 @@ typedef enum e_err
 	ERR_SCHEDULER
 }	t_err;
 
+typedef enum e_scheduler
+{
+	SCHED_FIFO,
+	SCHED_EDF
+}	t_scheduler;
+
 struct s_params
 {
 	int			number_of_coders;
@@ -37,7 +43,7 @@ struct s_params
 	int			time_to_refactor;
 	int			number_of_compiles_required;
 	int			dongle_cooldown;
-	int			scheduler;
+	t_scheduler	scheduler;
 	t_err		err_code;
 	const char	*err_arg;
 };
