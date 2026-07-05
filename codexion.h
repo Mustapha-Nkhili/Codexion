@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/03 16:03:36 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/04 22:57:30 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,30 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <limits.h>
+# include <string.h>
+
+typedef enum e_err
+{
+	ERR_NONE = 0,
+	ERR_ARGC,
+	ERR_NOT_NUMBER,
+	ERR_RANGE,
+	ERR_NOT_POSITIVE,
+	ERR_SCHEDULER
+}	t_err;
 
 struct s_params
 {
 	int			number_of_coders;
-	const char	*error;
+	int			time_to_burnout;
+	int			time_to_compile;
+	int			time_to_debug;
+	int			time_to_refactor;
+	int			number_of_compiles_required;
+	int			dongle_cooldown;
+	int			scheduler;
+	t_err		err_code;
+	const char	*err_arg;
 };
 
 struct s_params	parse_args(int args_len, char *argv[]);

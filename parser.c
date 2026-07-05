@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/02 18:11:19 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/03 12:07:34 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/04 23:19:19 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,49 +32,88 @@ static int	is_valid_number(const char *str)
 	return (1);
 }
 
-static struct s_params	validate_coders_nbr(long num, struct s_params params)
+static int	parse_nbr(const char *str_nbr, const char *arg_name,
+		int *number, struct s_params *params)
 {
-	char	*e;
+	long	value;
 
-	if (num > INT_MAX || num < INT_MIN)
+	if (!is_valid_number(str_nbr))
 	{
-		e = "Error (number of coders): number exceeds integer limits";
-		params.error = e;
-		return (params);
+		params->err_code = ERR_NOT_NUMBER;
+		params->err_arg = arg_name;
+		return (0);
 	}
-	if (num <= 0)
+	value = ft_atol(str_nbr);
+	if (value > INT_MAX || value < INT_MIN)
 	{
-		e = "Error (number of coders): it must be a positive number";
-		params.error = e;
-		return (params);
+		params->err_code = ERR_RANGE;
+		params->err_arg = arg_name;
+		return (0);
 	}
-	params.number_of_coders = num;
-	return (params);
+	if (value < 0)
+	{
+		params->err_code = ERR_NOT_POSITIVE;
+		params->err_arg = arg_name;
+		return (0);
+	}
+	*number = (int)value;
+	return (1);
+}
+
+static int	validate_coders_nbr(const char *str_nbr, int *number,
+		struct s_params *params)
+{
+	if (!parse_nbr(str_nbr, "number of coders", number, params))
+		return (0);
+	if (*number == 0)
+	{
+		params->err_code = ERR_NOT_POSITIVE;
+		params->err_arg = "number of coders";
+		return (0);
+	}
+	return (1);
+}
+
+int	parse_numeric_args(char *argv[], struct s_params *params)
+{
+	int	number;
+
+	if (!validate_coders_nbr(argv[1], &number, params))
+		return (0);
+	params->number_of_coders = number;
+	if (!parse_nbr(argv[2], "time to burnout", &number, params))
+		return (0);
+	params->time_to_burnout = number;
+	if (!parse_nbr(argv[3], "time to compile", &number, params))
+		return (0);
+	params->time_to_compile = number;
+	if (!parse_nbr(argv[4], "time to debug", &number, params))
+		return (0);
+	params->time_to_debug = number;
+	if (!parse_nbr(argv[5], "time to refactor", &number, params))
+		return (0);
+	params->time_to_refactor = number;
+	if (!parse_nbr(argv[6], "number of compile required", &number, params))
+		return (0);
+	params->number_of_compiles_required = number;
+	if (!parse_nbr(argv[7], "dongle cooldown", &number, params))
+		return (0);
+	params->dongle_cooldown = number;
+	return (1);
 }
 
 struct s_params	parse_args(int args_len, char *argv[])
 {
 	struct s_params	params;
-	long			number_of_coders;
 
-	params.error = NULL;
-	if (args_len == 9)
+	params.err_code = ERR_NONE;
+	params.err_arg = NULL;
+	if (args_len != 9)
 	{
-		if (is_valid_number(argv[1]))
-		{
-			number_of_coders = ft_atol(argv[1]);
-			params = validate_coders_nbr(number_of_coders, params);
-		}
-		else
-		{
-			params.error = "Error (number of coders): it must be a number";
-			return (params);
-		}
-	}
-	else
-	{
-		params.error = "Error: number of args must be exactly 8";
+		params.err_code = ERR_ARGC;
 		return (params);
 	}
+	if (!parse_numeric_args(argv, &params))
+		return (params);
 	return (params);
 }

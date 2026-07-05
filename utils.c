@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 11:28:40 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/03 13:01:58 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/04 22:02:25 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,6 @@ static long	extract_number(const char *str, int sign, long limit)
 long	ft_atol(const char *str)
 {
 	long	number;
-	long	overflow_result;
 	long	limit;
 	int		sign;
 
