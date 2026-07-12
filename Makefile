@@ -1,6 +1,6 @@
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -pthread
-SRCS = $(wildcard *.c)
+CFLAGS = -Wall -Wextra -Werror -pthread -I.
+SRCS = src/main.c src/parser.c utils/parser_utils.c
 OBJS = $(SRCS:.c=.o)
 NAME = codexion
 HEADER = codexion.h
