@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/05 16:46:31 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/12 10:29:40 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,23 @@ struct s_params
 	t_err		err_code;
 	const char	*err_arg;
 };
+
+typedef enum s_coder_state
+{
+	STATE_COMPILING,
+	STATE_DEBUGGING,
+	STATE_REFACTORING,
+	STATE_WAITING_FOR_DONGLES
+}	t_coder_state;
+
+typedef struct s_coder
+{
+	int				id;
+	long long		last_compile_start;
+	t_coder_state	state;
+	int				compile_count;
+	struct s_params	*params;
+}	t_coder;
 
 struct s_params	parse_args(int args_len, char *argv[]);
 long			ft_atol(const char *str);
