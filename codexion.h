@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/12 10:29:40 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/12 20:54:00 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,8 +65,16 @@ typedef struct s_coder
 	struct s_params	*params;
 }	t_coder;
 
+typedef struct s_request
+{
+	int			coder_id;
+	long long	deadline;
+	long long	arrival_order;
+}	t_request;
+
 struct s_params	parse_args(int args_len, char *argv[]);
 long			ft_atol(const char *str);
 int				is_whitespace(char c);
+void			build_heap(t_request arr[], int n, t_scheduler scheduler);
 
 #endif
