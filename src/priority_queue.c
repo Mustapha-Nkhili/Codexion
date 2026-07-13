@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/09 10:56:14 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/12 20:53:03 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/13 15:56:18 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,4 +64,29 @@ void	build_heap(t_request arr[], int n, t_scheduler scheduler)
 		heapify(arr, n, i, scheduler);
 		i--;
 	}
+}
+
+int	heap_insert(t_request *array, t_request new_req, int *len,
+		t_scheduler scheduler)
+{
+	int			nbr_index;
+	int			parent;
+
+	if (*len > 1)
+		return (1);
+	array[*len] = new_req;
+	nbr_index = *len;
+	while (nbr_index != 0)
+	{
+		parent = (nbr_index - 1) / 2;
+		if (has_higher_priority(array[nbr_index], array[parent], scheduler))
+		{
+			swap(&array[nbr_index], &array[parent]);
+			nbr_index = parent;
+		}
+		else
+			break ;
+	}
+	*len += 1;
+	return (0);
 }
