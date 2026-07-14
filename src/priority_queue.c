@@ -6,29 +6,11 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/09 10:56:14 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/13 15:56:18 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/13 16:44:14 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
-
-static void	swap(t_request *a, t_request *b)
-{
-	t_request	temp;
-
-	temp = *a;
-	*a = *b;
-	*b = temp;
-}
-
-static int	has_higher_priority(t_request a, t_request b, t_scheduler scheduler)
-{
-	if (scheduler == SCHED_FIFO)
-		return (a.arrival_order < b.arrival_order);
-	if (a.deadline != b.deadline)
-		return (a.deadline < b.deadline);
-	return (a.arrival_order < b.arrival_order);
-}
 
 static void	heapify(t_request array[], int len, int i, t_scheduler scheduler)
 {
@@ -88,5 +70,23 @@ int	heap_insert(t_request *array, t_request new_req, int *len,
 			break ;
 	}
 	*len += 1;
+	return (0);
+}
+
+int	heap_extract_min(t_request *min_heap, int *len, t_scheduler scheduler,
+		t_request *out)
+{
+	t_request	min;
+	t_request	last_item;
+
+	if (*len == 0)
+		return (1);
+	last_item = min_heap[*len - 1];
+	min = min_heap[0];
+	*len -= 1;
+	min_heap[0] = last_item;
+	if (*len > 0)
+		heapify(min_heap, *len, 0, scheduler);
+	*out = min;
 	return (0);
 }

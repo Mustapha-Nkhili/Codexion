@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/12 20:54:00 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/13 16:48:15 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,5 +76,8 @@ struct s_params	parse_args(int args_len, char *argv[]);
 long			ft_atol(const char *str);
 int				is_whitespace(char c);
 void			build_heap(t_request arr[], int n, t_scheduler scheduler);
+void			swap(t_request *a, t_request *b);
+int				has_higher_priority(t_request a, t_request b,
+					t_scheduler scheduler);
 
 #endif
