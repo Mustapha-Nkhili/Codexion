@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/02 18:11:19 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/05 16:47:02 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/14 11:24:51 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,9 +116,9 @@ struct s_params	parse_args(int args_len, char *argv[])
 	if (!parse_numeric_args(argv, &params))
 		return (params);
 	if (strcmp("fifo", argv[8]) == 0)
-		params.scheduler = SCHED_FIFO;
+		params.scheduler = CODEXION_SCHED_FIFO;
 	else if (strcmp("edf", argv[8]) == 0)
-		params.scheduler = SCHED_EDF;
+		params.scheduler = CODEXION_SCHED_EDF;
 	else
 	{
 		params.err_code = ERR_SCHEDULER;

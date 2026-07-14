@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/13 16:48:15 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/14 11:23:31 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,8 @@ typedef enum e_err
 
 typedef enum e_scheduler
 {
-	SCHED_FIFO,
-	SCHED_EDF
+	CODEXION_SCHED_FIFO,
+	CODEXION_SCHED_EDF
 }	t_scheduler;
 
 struct s_params
