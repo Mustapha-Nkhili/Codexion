@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/14 11:23:31 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/14 11:53:16 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,17 @@ typedef struct s_request
 	long long	arrival_order;
 }	t_request;
 
+typedef struct s_dongle
+{
+	int				id;
+	int				available;
+	long long		free_at;
+	pthread_mutex_t	lock;
+	pthread_cond_t	cond;
+	t_request		waiters[2];
+	int				waiters_len;
+}	t_dongle;
+
 struct s_params	parse_args(int args_len, char *argv[]);
 long			ft_atol(const char *str);
 int				is_whitespace(char c);
@@ -79,5 +90,11 @@ void			build_heap(t_request arr[], int n, t_scheduler scheduler);
 void			swap(t_request *a, t_request *b);
 int				has_higher_priority(t_request a, t_request b,
 					t_scheduler scheduler);
+void			init_err_msgs(const char *err_msgs[]);
+void			init_coders(t_coder *coders, struct s_params *params,
+					long long sim_start);
+int				init_dongles(t_dongle *dongles, int number_of_coders,
+					long long sim_start);
+void			destroy_dongles(t_dongle *dongles, int dongles_nbr);
 
 #endif
