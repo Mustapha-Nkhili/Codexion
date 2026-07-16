@@ -6,11 +6,12 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/02 17:32:39 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/14 11:51:04 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/16 19:31:48 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <sys/time.h>
+#include <pthread.h>
 #include "codexion.h"
 
 long long	get_timestamp_ms(void)
@@ -40,31 +41,36 @@ int	handle_error(const char *err_source, const char *err_msg)
 	return (1);
 }
 
+static int	run_simulation(struct s_params *params)
+{
+	t_coder		*coders;
+	t_dongle	*dongles;
+	int			result;
+
+	coders = malloc(params->number_of_coders * sizeof(t_coder));
+	if (coders == NULL)
+		return (handle_error(NULL, "failed to allocate coders"));
+	init_coders(coders, params, get_timestamp_ms());
+	dongles = malloc(params->number_of_coders * sizeof(t_dongle));
+	if (dongles == NULL)
+		return (handle_error(NULL, "failed to allocate dongles"));
+	result = init_dongles(dongles, params->number_of_coders,
+			get_timestamp_ms());
+	if (result != 0)
+		return (handle_error(NULL, "initialisation of dongles failed"));
+	return (0);
+}
+
 int	main(int argc, char *argv[])
 {
-	struct s_params	params;
-	const char		*err_msgs[6];
-	t_coder			*coders;
-	t_dongle		*dongles;
-	int				result;
+	struct s_params		params;
+	const char			*err_msgs[6];
 
 	init_err_msgs(err_msgs);
 	params = parse_args(argc, argv);
-	if (params.err_code == ERR_NONE)
-	{
-		coders = malloc(params.number_of_coders * sizeof(t_coder));
-		if (coders == NULL)
-			return (handle_error(NULL, "failed to allocate coders"));
-		init_coders(coders, &params, get_timestamp_ms());
-		dongles = malloc(params.number_of_coders * sizeof(t_dongle));
-		if (dongles == NULL)
-			return (handle_error(NULL, "failed to allocate dongles"));
-		result = init_dongles(dongles, params.number_of_coders,
-				get_timestamp_ms());
-		if (result != 0)
-			return (handle_error(NULL, "initialisation of dongles failed"));
-	}
-	else
+	if (params.err_code != ERR_NONE)
 		return (handle_error(params.err_arg, err_msgs[params.err_code]));
+	if (run_simulation(&params) != 0)
+		return (1);
 	return (0);
 }
