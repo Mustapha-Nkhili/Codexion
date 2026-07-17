@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/16 19:04:17 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/17 17:45:37 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/17 18:22:29 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,5 +48,14 @@ void	acquire_dongle(t_coder *coder, t_dongle *dongle,
 	dongle->available = 0;
 	heap_extract_min(dongle->waiters, &dongle->waiters_len, scheduler,
 		&request);
+	pthread_mutex_unlock(&dongle->lock);
+}
+
+void	release_dongle(t_dongle *dongle, int dongle_cooldown)
+{
+	pthread_mutex_lock(&dongle->lock);
+	dongle->available = 1;
+	dongle->free_at = get_timestamp_ms() + dongle_cooldown;
+	pthread_cond_broadcast(&dongle->cond);
 	pthread_mutex_unlock(&dongle->lock);
 }

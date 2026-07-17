@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/17 17:42:21 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/17 18:40:15 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,5 +109,6 @@ int				init_dongles(t_dongle *dongles, int number_of_coders,
 void			destroy_dongles(t_dongle *dongles, int dongles_nbr);
 void			acquire_dongle(t_coder *coder, t_dongle *dongle,
 					t_ticket_counter *counter);
+void	release_dongle(t_dongle *dongle, int dongle_cooldown);
 
 #endif
