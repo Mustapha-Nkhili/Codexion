@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/16 19:04:17 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/18 14:13:56 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/18 16:04:42 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,4 +84,18 @@ void	acquire_both_dongles(t_coder *coder, t_dongle *dongles,
 		acquire_dongle(coder, &dongles[left], counter);
 		log_taken_dongle(logger_lock, coder->id);
 	}
+}
+
+void	release_both_dongles(t_coder *coder, t_dongle *dongles,
+			int dongle_cooldown)
+{
+	int	left;
+	int	right;
+	int	number_of_coders;
+
+	number_of_coders = coder->params->number_of_coders;
+	left = get_left_dongle_index(coder->id, number_of_coders);
+	right = get_right_dongle_index(coder->id);
+	release_dongle(&dongles[left], dongle_cooldown);
+	release_dongle(&dongles[right], dongle_cooldown);
 }
