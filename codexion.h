@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/18 02:29:15 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/18 14:15:28 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,5 +114,9 @@ void			log_state(pthread_mutex_t *logger_lock, int coder_id,
 					t_coder_state state);
 void			log_taken_dongle(pthread_mutex_t *logger_lock, int coder_id);
 void			log_burnout(pthread_mutex_t *logger_lock, int coder_id);
+int				get_left_dongle_index(int coder_id, int number_of_coders);
+int				get_right_dongle_index(int coder_id);
+void			acquire_both_dongles(t_coder *coder, t_dongle *dongles,
+					t_ticket_counter *counter, pthread_mutex_t *logger_lock);
 
 #endif
