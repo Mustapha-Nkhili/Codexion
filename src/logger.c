@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/17 17:19:25 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/18 00:43:30 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/18 02:29:45 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,5 +30,19 @@ void	log_state(pthread_mutex_t *logger_lock, int coder_id,
 {
 	pthread_mutex_lock(logger_lock);
 	printf("%lld %d %s\n", get_timestamp_ms(), coder_id, state_to_str(state));
+	pthread_mutex_unlock(logger_lock);
+}
+
+void	log_taken_dongle(pthread_mutex_t *logger_lock, int coder_id)
+{
+	pthread_mutex_lock(logger_lock);
+	printf("%lld %d has taken a dongle\n", get_timestamp_ms(), coder_id);
+	pthread_mutex_unlock(logger_lock);
+}
+
+void	log_burnout(pthread_mutex_t *logger_lock, int coder_id)
+{
+	pthread_mutex_lock(logger_lock);
+	printf("%lld %d burned out\n", get_timestamp_ms(), coder_id);
 	pthread_mutex_unlock(logger_lock);
 }

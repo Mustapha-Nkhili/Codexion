@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/18 00:44:17 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/18 02:29:15 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,5 +112,7 @@ void			acquire_dongle(t_coder *coder, t_dongle *dongle,
 void			release_dongle(t_dongle *dongle, int dongle_cooldown);
 void			log_state(pthread_mutex_t *logger_lock, int coder_id,
 					t_coder_state state);
+void			log_taken_dongle(pthread_mutex_t *logger_lock, int coder_id);
+void			log_burnout(pthread_mutex_t *logger_lock, int coder_id);
 
 #endif
