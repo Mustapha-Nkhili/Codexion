@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/18 16:04:28 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/19 16:32:52 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,14 @@ typedef struct s_ticket_counter
 	pthread_mutex_t	lock;
 }	t_ticket_counter;
 
+typedef struct s_sim_state
+{
+	pthread_mutex_t	lock;
+	int				stop;
+	int				finished_count;
+	int				number_of_coders;
+}	t_sim_state;
+
 struct s_params	parse_args(int args_len, char *argv[]);
 long			ft_atol(const char *str);
 int				is_whitespace(char c);
@@ -120,5 +128,9 @@ void			acquire_both_dongles(t_coder *coder, t_dongle *dongles,
 					t_ticket_counter *counter, pthread_mutex_t *logger_lock);
 void			release_both_dongles(t_coder *coder, t_dongle *dongles,
 					int dongle_cooldown);
+void			init_sim(t_sim_state *sim, int number_of_coders);
+int				is_sim_should_stop(t_sim_state *sim);
+void			mark_coder_finished_sim(t_sim_state *sim);
+void			mark_sim_burnout(t_sim_state *sim);
 
 #endif
