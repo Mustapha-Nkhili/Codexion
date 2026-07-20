@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/20 15:31:06 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/20 18:29:37 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,11 +99,11 @@ typedef struct s_sim_state
 
 typedef struct s_coder_args
 {
-	t_coder			*coder;
-	t_dongle		*dongles;
+	t_coder				*coder;
+	t_dongle			*dongles;
 	t_ticket_counter	*ticket_counter;
-	pthread_mutex_t	*logger_lock;
-	t_sim_state		*sim_state;
+	pthread_mutex_t		*logger_lock;
+	t_sim_state			*sim_state;
 }	t_coder_args;
 
 struct s_params	parse_args(int args_len, char *argv[]);
@@ -133,6 +133,7 @@ void			log_taken_dongle(pthread_mutex_t *logger_lock, int coder_id);
 void			log_burnout(pthread_mutex_t *logger_lock, int coder_id);
 int				get_left_dongle_index(int coder_id, int number_of_coders);
 int				get_right_dongle_index(int coder_id);
+struct timespec	ms_to_timespec(long long ms);
 void			acquire_both_dongles(t_coder *coder, t_dongle *dongles,
 					t_ticket_counter *counter, pthread_mutex_t *logger_lock);
 void			release_both_dongles(t_coder *coder, t_dongle *dongles,

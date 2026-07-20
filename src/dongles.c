@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/16 19:04:17 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/18 16:04:42 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/20 18:24:31 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,10 @@ long long	get_next_ticket(t_ticket_counter *counter)
 void	acquire_dongle(t_coder *coder, t_dongle *dongle,
 			t_ticket_counter *counter)
 {
-	t_request	request;
-	t_scheduler	scheduler;
-	int			is_coder_min;
+	t_request		request;
+	t_scheduler		scheduler;
+	int				is_coder_min;
+	struct timespec	deadline_ts;
 
 	scheduler = coder->params->scheduler;
 	request.coder_id = coder->id;
@@ -42,7 +43,8 @@ void	acquire_dongle(t_coder *coder, t_dongle *dongle,
 	while (!dongle->available || get_timestamp_ms() < dongle->free_at
 		|| !is_coder_min)
 	{
-		pthread_cond_wait(&dongle->cond, &dongle->lock);
+		deadline_ts = ms_to_timespec(dongle->free_at);
+		pthread_cond_timedwait(&dongle->cond, &dongle->lock, &deadline_ts);
 		is_coder_min = (dongle->waiters[0].coder_id == coder->id);
 	}
 	dongle->available = 0;
