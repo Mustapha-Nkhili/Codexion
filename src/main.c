@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/02 17:32:39 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/17 17:25:08 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/20 15:30:52 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,12 @@ static int	run_simulation(struct s_params *params,
 	t_coder		*coders;
 	t_dongle	*dongles;
 	int			result;
+	t_sim_state	sim_state;
+	pthread_t	*coders_threads;
+	t_coder_args	*coder_args;
+	pthread_mutex_t	logger_lock;
 
+	pthread_mutex_init(&logger_lock, NULL);
 	coders = malloc(params->number_of_coders * sizeof(t_coder));
 	if (coders == NULL)
 		return (handle_error(NULL, "failed to allocate coders"));
@@ -59,11 +64,30 @@ static int	run_simulation(struct s_params *params,
 			get_timestamp_ms());
 	if (result != 0)
 		return (handle_error(NULL, "initialisation of dongles failed"));
-	acquire_dongle(&coders[0], &dongles[0], ticket_counter);
-	printf("%d\n", dongles[0].waiters[0].coder_id);
-	printf("%d\n", dongles[0].waiters_len);
-	printf("%lld\n", dongles[0].waiters[0].deadline);
-	printf("%lld\n", dongles[0].waiters[0].arrival_order);
+	init_sim(&sim_state, params->number_of_coders);
+	coders_threads = malloc(params->number_of_coders * sizeof(pthread_t));
+	if (coders_threads == NULL)
+		return (handle_error(NULL, "failed to allocate coders threads"));
+	coder_args = malloc(params->number_of_coders * sizeof(t_coder_args));
+	if (coder_args == NULL)
+		return (handle_error(NULL, "failed to allocate coders args"));
+	int i = 0;
+	while (i < params->number_of_coders)
+	{
+		coder_args[i].coder = &coders[i];
+		coder_args[i].dongles = dongles;
+		coder_args[i].ticket_counter = ticket_counter;
+		coder_args[i].logger_lock = &logger_lock;
+		coder_args[i].sim_state = &sim_state;
+		pthread_create(&coders_threads[i], NULL, coder_routine, &coder_args[i]);
+		i++;
+	}
+	i = 0;
+	while (i < params->number_of_coders)
+	{
+		pthread_join(coders_threads[i], NULL);
+		i++;
+	}
 	return (0);
 }
 

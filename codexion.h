@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/19 16:32:52 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/20 15:31:06 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,6 +97,15 @@ typedef struct s_sim_state
 	int				number_of_coders;
 }	t_sim_state;
 
+typedef struct s_coder_args
+{
+	t_coder			*coder;
+	t_dongle		*dongles;
+	t_ticket_counter	*ticket_counter;
+	pthread_mutex_t	*logger_lock;
+	t_sim_state		*sim_state;
+}	t_coder_args;
+
 struct s_params	parse_args(int args_len, char *argv[]);
 long			ft_atol(const char *str);
 int				is_whitespace(char c);
@@ -132,5 +141,6 @@ void			init_sim(t_sim_state *sim, int number_of_coders);
 int				is_sim_should_stop(t_sim_state *sim);
 void			mark_coder_finished_sim(t_sim_state *sim);
 void			mark_sim_burnout(t_sim_state *sim);
+void			*coder_routine(void *a);
 
 #endif
