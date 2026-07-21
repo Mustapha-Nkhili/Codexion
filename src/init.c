@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 11:14:51 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/14 11:51:49 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/21 17:42:17 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ void	init_coders(t_coder *coders, struct s_params *params,
 		coders[i].state = STATE_WAITING_FOR_DONGLES;
 		coders[i].compile_count = 0;
 		coders[i].params = params;
+		pthread_mutex_init(&coders[i].lock, NULL);
 		i++;
 	}
 }

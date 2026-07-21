@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/02 17:32:39 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/20 15:30:52 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/21 17:47:08 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,8 @@ static int	run_simulation(struct s_params *params,
 	pthread_t	*coders_threads;
 	t_coder_args	*coder_args;
 	pthread_mutex_t	logger_lock;
+	pthread_t	monitor_thread;
+	t_monitor_args	monitor_args;
 
 	pthread_mutex_init(&logger_lock, NULL);
 	coders = malloc(params->number_of_coders * sizeof(t_coder));
@@ -82,12 +84,17 @@ static int	run_simulation(struct s_params *params,
 		pthread_create(&coders_threads[i], NULL, coder_routine, &coder_args[i]);
 		i++;
 	}
+	monitor_args.coders = coders;
+	monitor_args.sim_state = &sim_state;
+	monitor_args.logger_lock = &logger_lock;
+	pthread_create(&monitor_thread, NULL, monitor_routine_wrapper, &monitor_args);
 	i = 0;
 	while (i < params->number_of_coders)
 	{
 		pthread_join(coders_threads[i], NULL);
 		i++;
 	}
+	pthread_join(monitor_thread, NULL);
 	return (0);
 }
 
