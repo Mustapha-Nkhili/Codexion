@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/21 17:42:02 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/21 22:31:17 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,6 +114,17 @@ typedef struct s_monitor_args
 	pthread_mutex_t	*logger_lock;
 }	t_monitor_args;
 
+typedef struct s_sim_variables
+{
+	t_coder			*coders;
+	t_dongle		*dongles;
+	pthread_t		*threads;
+	t_coder_args	*coder_args;
+	t_sim_state		*sim_state;
+	t_monitor_args	*monitor_args;
+	pthread_t		*monitor_thread;
+}	t_sim_variables;
+
 struct s_params	parse_args(int args_len, char *argv[]);
 long			ft_atol(const char *str);
 int				is_whitespace(char c);
@@ -146,11 +157,13 @@ void			acquire_both_dongles(t_coder *coder, t_dongle *dongles,
 					t_ticket_counter *counter, pthread_mutex_t *logger_lock);
 void			release_both_dongles(t_coder *coder, t_dongle *dongles,
 					int dongle_cooldown);
+int				run_simulation(struct s_params *params, t_ticket_counter *ticket_counter);
 void			init_sim(t_sim_state *sim, int number_of_coders);
 int				is_sim_should_stop(t_sim_state *sim);
 void			mark_coder_finished_sim(t_sim_state *sim);
 void			mark_sim_burnout(t_sim_state *sim);
 void			*coder_routine(void *a);
 void			*monitor_routine_wrapper(void *arg);
+int				handle_error(const char *err_source, const char *err_msg);
 
 #endif

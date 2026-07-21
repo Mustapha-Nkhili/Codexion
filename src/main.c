@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/02 17:32:39 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/21 17:47:08 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/22 00:42:07 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,63 +39,6 @@ int	handle_error(const char *err_source, const char *err_msg)
 	else
 		fprintf(stderr, "Unexpected Error occured\n");
 	return (1);
-}
-
-static int	run_simulation(struct s_params *params,
-				t_ticket_counter *ticket_counter)
-{
-	t_coder		*coders;
-	t_dongle	*dongles;
-	int			result;
-	t_sim_state	sim_state;
-	pthread_t	*coders_threads;
-	t_coder_args	*coder_args;
-	pthread_mutex_t	logger_lock;
-	pthread_t	monitor_thread;
-	t_monitor_args	monitor_args;
-
-	pthread_mutex_init(&logger_lock, NULL);
-	coders = malloc(params->number_of_coders * sizeof(t_coder));
-	if (coders == NULL)
-		return (handle_error(NULL, "failed to allocate coders"));
-	init_coders(coders, params, get_timestamp_ms());
-	dongles = malloc(params->number_of_coders * sizeof(t_dongle));
-	if (dongles == NULL)
-		return (handle_error(NULL, "failed to allocate dongles"));
-	result = init_dongles(dongles, params->number_of_coders,
-			get_timestamp_ms());
-	if (result != 0)
-		return (handle_error(NULL, "initialisation of dongles failed"));
-	init_sim(&sim_state, params->number_of_coders);
-	coders_threads = malloc(params->number_of_coders * sizeof(pthread_t));
-	if (coders_threads == NULL)
-		return (handle_error(NULL, "failed to allocate coders threads"));
-	coder_args = malloc(params->number_of_coders * sizeof(t_coder_args));
-	if (coder_args == NULL)
-		return (handle_error(NULL, "failed to allocate coders args"));
-	int i = 0;
-	while (i < params->number_of_coders)
-	{
-		coder_args[i].coder = &coders[i];
-		coder_args[i].dongles = dongles;
-		coder_args[i].ticket_counter = ticket_counter;
-		coder_args[i].logger_lock = &logger_lock;
-		coder_args[i].sim_state = &sim_state;
-		pthread_create(&coders_threads[i], NULL, coder_routine, &coder_args[i]);
-		i++;
-	}
-	monitor_args.coders = coders;
-	monitor_args.sim_state = &sim_state;
-	monitor_args.logger_lock = &logger_lock;
-	pthread_create(&monitor_thread, NULL, monitor_routine_wrapper, &monitor_args);
-	i = 0;
-	while (i < params->number_of_coders)
-	{
-		pthread_join(coders_threads[i], NULL);
-		i++;
-	}
-	pthread_join(monitor_thread, NULL);
-	return (0);
 }
 
 int	main(int argc, char *argv[])

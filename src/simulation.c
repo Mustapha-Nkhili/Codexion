@@ -5,44 +5,109 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/18 03:21:54 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/19 16:32:31 by mn-khili         ###   ########.fr       */
+/*   Created: 2026/07/21 19:32:28 by mn-khili          #+#    #+#             */
+/*   Updated: 2026/07/22 00:50:45 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <pthread.h>
+#include <stdlib.h>
 #include "codexion.h"
 
-void	init_sim(t_sim_state *sim, int number_of_coders)
+static int	allocate_resources(struct s_params *params, t_coder **coders,
+				t_dongle **dongles, pthread_t **coders_threads)
 {
-	pthread_mutex_init(&sim->lock, NULL);
-	sim->stop = 0;
-	sim->finished_count = 0;
-	sim->number_of_coders = number_of_coders;
+	*coders = malloc(params->number_of_coders * sizeof(t_coder));
+	if (*coders == NULL)
+		return (handle_error(NULL, "failed to allocate coders"));
+	init_coders(*coders, params, get_timestamp_ms());
+	*dongles = malloc(params->number_of_coders * sizeof(t_dongle));
+	if (*dongles == NULL)
+		return (handle_error(NULL, "failed to allocate dongles"));
+	if (init_dongles(*dongles, params->number_of_coders,
+			get_timestamp_ms()) != 0)
+		return (handle_error(NULL, "initialisation of dongles failed"));
+	*coders_threads = malloc(params->number_of_coders * sizeof(pthread_t));
+	if (*coders_threads == NULL)
+		return (handle_error(NULL, "failed to allocate coders threads"));
+	return (0);
 }
 
-int	is_sim_should_stop(t_sim_state *sim)
+static int	setup_simulation(struct s_params *params, t_sim_variables *sim_vars,
+				t_sim_state *sim_state)
 {
-	int	stop;
+	int	result;
 
-	pthread_mutex_lock(&sim->lock);
-	stop = sim->stop;
-	pthread_mutex_unlock(&sim->lock);
-	return (stop);
+	result = allocate_resources(params, &sim_vars->coders,
+			&sim_vars->dongles, &sim_vars->threads);
+	if (result != 0)
+		return (1);
+	init_sim(sim_state, params->number_of_coders);
+	return (0);
 }
 
-void	mark_sim_burnout(t_sim_state *sim)
+static void	create_threads(struct s_params *params, t_ticket_counter *counter,
+				t_sim_variables *sim_vars, pthread_mutex_t *logger_lock)
 {
-	pthread_mutex_lock(&sim->lock);
-	sim->stop = 1;
-	pthread_mutex_unlock(&sim->lock);
+	int	i;
+
+	i = 0;
+	while (i < params->number_of_coders)
+	{
+		sim_vars->coder_args[i].coder = &sim_vars->coders[i];
+		sim_vars->coder_args[i].dongles = sim_vars->dongles;
+		sim_vars->coder_args[i].ticket_counter = counter;
+		sim_vars->coder_args[i].logger_lock = logger_lock;
+		sim_vars->coder_args[i].sim_state = sim_vars->sim_state;
+		pthread_create(&sim_vars->threads[i], NULL, coder_routine,
+			&sim_vars->coder_args[i]);
+		i++;
+	}
+	sim_vars->monitor_args->coders = sim_vars->coders;
+	sim_vars->monitor_args->sim_state = sim_vars->sim_state;
+	sim_vars->monitor_args->logger_lock = logger_lock;
+	pthread_create(sim_vars->monitor_thread, NULL, monitor_routine_wrapper,
+		sim_vars->monitor_args);
 }
 
-void	mark_coder_finished_sim(t_sim_state *sim)
+static void	join_threads(int number_of_coders, pthread_t *coders_threads,
+				pthread_t monitor_thread)
 {
-	pthread_mutex_lock(&sim->lock);
-	sim->finished_count++;
-	if (sim->finished_count == sim->number_of_coders)
-		sim->stop = 1;
-	pthread_mutex_unlock(&sim->lock);
+	int	i;
+
+	i = 0;
+	while (i < number_of_coders)
+	{
+		pthread_join(coders_threads[i], NULL);
+		i++;
+	}
+	pthread_join(monitor_thread, NULL);
+}
+
+int	run_simulation(struct s_params *params, t_ticket_counter *ticket_counter)
+{
+	t_sim_variables			sim_vars;
+	pthread_mutex_t			logger_lock;
+	t_sim_state				sim_state;
+	t_monitor_args			monitor_args;
+	pthread_t				monitor_thread;
+
+	sim_vars.sim_state = &sim_state;
+	sim_vars.monitor_args = &monitor_args;
+	sim_vars.monitor_thread = &monitor_thread;
+	pthread_mutex_init(&logger_lock, NULL);
+	if (setup_simulation(params, &sim_vars, &sim_state) != 0)
+		return (1);
+	sim_vars.coder_args = malloc(
+			params->number_of_coders * sizeof(t_coder_args));
+	if (sim_vars.coder_args == NULL)
+		return (handle_error(NULL, "failed to allocate coders args"));
+	create_threads(params, ticket_counter, &sim_vars, &logger_lock);
+	join_threads(params->number_of_coders, sim_vars.threads, monitor_thread);
+	free(sim_vars.coders);
+	free(sim_vars.dongles);
+	free(sim_vars.threads);
+	free(sim_vars.coder_args);
+	pthread_mutex_destroy(&logger_lock);
+	return (0);
 }
