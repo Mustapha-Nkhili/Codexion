@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/20 02:28:29 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/21 17:42:49 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/22 04:36:04 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "codexion.h"
 
 static int	check_coder_burnout(t_coder *coder, t_sim_state *sim_state,
-				pthread_mutex_t *logger_lock)
+				t_logger *logger)
 {
 	long long	deadline;
 
@@ -23,7 +23,7 @@ static int	check_coder_burnout(t_coder *coder, t_sim_state *sim_state,
 	deadline = coder->last_compile_start + coder->params->time_to_burnout;
 	if (get_timestamp_ms() >= deadline)
 	{
-		log_burnout(logger_lock, coder->id);
+		log_burnout(logger, coder->id);
 		mark_sim_burnout(sim_state);
 		pthread_mutex_unlock(&coder->lock);
 		return (1);
@@ -33,7 +33,7 @@ static int	check_coder_burnout(t_coder *coder, t_sim_state *sim_state,
 }
 
 static void	monitor_routine(t_coder *coders, t_sim_state *sim_state,
-			pthread_mutex_t *logger_lock)
+			t_logger *logger)
 {
 	int			i;
 	int			number_of_coders;
@@ -46,7 +46,7 @@ static void	monitor_routine(t_coder *coders, t_sim_state *sim_state,
 		i = 0;
 		while (i < number_of_coders)
 		{
-			if (check_coder_burnout(&coders[i], sim_state, logger_lock))
+			if (check_coder_burnout(&coders[i], sim_state, logger))
 				return ;
 			i++;
 		}
@@ -59,6 +59,6 @@ void	*monitor_routine_wrapper(void *arg)
 	t_monitor_args	*m;
 
 	m = (t_monitor_args *)arg;
-	monitor_routine(m->coders, m->sim_state, m->logger_lock);
+	monitor_routine(m->coders, m->sim_state, m->logger);
 	return (NULL);
 }

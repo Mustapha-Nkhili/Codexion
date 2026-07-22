@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/21 22:31:17 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/22 04:51:01 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,12 +98,18 @@ typedef struct s_sim_state
 	int				number_of_coders;
 }	t_sim_state;
 
+typedef struct s_logger
+{
+	pthread_mutex_t	lock;
+	long long		sim_start_time;
+}	t_logger;
+
 typedef struct s_coder_args
 {
 	t_coder				*coder;
 	t_dongle			*dongles;
 	t_ticket_counter	*ticket_counter;
-	pthread_mutex_t		*logger_lock;
+	t_logger			*logger;
 	t_sim_state			*sim_state;
 }	t_coder_args;
 
@@ -111,7 +117,7 @@ typedef struct s_monitor_args
 {
 	t_coder			*coders;
 	t_sim_state		*sim_state;
-	pthread_mutex_t	*logger_lock;
+	t_logger		*logger;
 }	t_monitor_args;
 
 typedef struct s_sim_variables
@@ -123,6 +129,7 @@ typedef struct s_sim_variables
 	t_sim_state		*sim_state;
 	t_monitor_args	*monitor_args;
 	pthread_t		*monitor_thread;
+	long long		sim_start_time;
 }	t_sim_variables;
 
 struct s_params	parse_args(int args_len, char *argv[]);
@@ -146,18 +153,19 @@ void			destroy_dongles(t_dongle *dongles, int dongles_nbr);
 void			acquire_dongle(t_coder *coder, t_dongle *dongle,
 					t_ticket_counter *counter);
 void			release_dongle(t_dongle *dongle, int dongle_cooldown);
-void			log_state(pthread_mutex_t *logger_lock, int coder_id,
+void			log_state(t_logger *logger, int coder_id,
 					t_coder_state state);
-void			log_taken_dongle(pthread_mutex_t *logger_lock, int coder_id);
-void			log_burnout(pthread_mutex_t *logger_lock, int coder_id);
+void			log_taken_dongle(t_logger *logger, int coder_id);
+void			log_burnout(t_logger *logger, int coder_id);
 int				get_left_dongle_index(int coder_id, int number_of_coders);
 int				get_right_dongle_index(int coder_id);
 struct timespec	ms_to_timespec(long long ms);
 void			acquire_both_dongles(t_coder *coder, t_dongle *dongles,
-					t_ticket_counter *counter, pthread_mutex_t *logger_lock);
+					t_ticket_counter *counter, t_logger *logger);
 void			release_both_dongles(t_coder *coder, t_dongle *dongles,
 					int dongle_cooldown);
-int				run_simulation(struct s_params *params, t_ticket_counter *ticket_counter);
+int				run_simulation(struct s_params *params,
+					t_ticket_counter *ticket_counter);
 void			init_sim(t_sim_state *sim, int number_of_coders);
 int				is_sim_should_stop(t_sim_state *sim);
 void			mark_coder_finished_sim(t_sim_state *sim);

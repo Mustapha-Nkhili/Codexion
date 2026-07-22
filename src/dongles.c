@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/16 19:04:17 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/20 18:24:31 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/22 04:36:24 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ void	release_dongle(t_dongle *dongle, int dongle_cooldown)
 }
 
 void	acquire_both_dongles(t_coder *coder, t_dongle *dongles,
-			t_ticket_counter *counter, pthread_mutex_t *logger_lock)
+			t_ticket_counter *counter, t_logger *logger)
 {
 	int	left;
 	int	right;
@@ -75,16 +75,16 @@ void	acquire_both_dongles(t_coder *coder, t_dongle *dongles,
 	if (left < right)
 	{
 		acquire_dongle(coder, &dongles[left], counter);
-		log_taken_dongle(logger_lock, coder->id);
+		log_taken_dongle(logger, coder->id);
 		acquire_dongle(coder, &dongles[right], counter);
-		log_taken_dongle(logger_lock, coder->id);
+		log_taken_dongle(logger, coder->id);
 	}
 	else
 	{
 		acquire_dongle(coder, &dongles[right], counter);
-		log_taken_dongle(logger_lock, coder->id);
+		log_taken_dongle(logger, coder->id);
 		acquire_dongle(coder, &dongles[left], counter);
-		log_taken_dongle(logger_lock, coder->id);
+		log_taken_dongle(logger, coder->id);
 	}
 }
 
