@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/22 04:51:01 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/23 00:38:22 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,9 +150,9 @@ void			init_coders(t_coder *coders, struct s_params *params,
 int				init_dongles(t_dongle *dongles, int number_of_coders,
 					long long sim_start);
 void			destroy_dongles(t_dongle *dongles, int dongles_nbr);
-void			acquire_dongle(t_coder *coder, t_dongle *dongle,
-					t_ticket_counter *counter);
-void			release_dongle(t_dongle *dongle, int dongle_cooldown);
+// void			acquire_dongle(t_coder *coder, t_dongle *dongle,
+// 					t_ticket_counter *counter);
+// void			release_dongle(t_dongle *dongle, int dongle_cooldown);
 void			log_state(t_logger *logger, int coder_id,
 					t_coder_state state);
 void			log_taken_dongle(t_logger *logger, int coder_id);
@@ -160,8 +160,9 @@ void			log_burnout(t_logger *logger, int coder_id);
 int				get_left_dongle_index(int coder_id, int number_of_coders);
 int				get_right_dongle_index(int coder_id);
 struct timespec	ms_to_timespec(long long ms);
-void			acquire_both_dongles(t_coder *coder, t_dongle *dongles,
-					t_ticket_counter *counter, t_logger *logger);
+// void			acquire_both_dongles(t_coder *coder, t_dongle *dongles,
+// 					t_ticket_counter *counter, t_logger *logger);
+void			acquire_both_dongles(t_coder_args *args);
 void			release_both_dongles(t_coder *coder, t_dongle *dongles,
 					int dongle_cooldown);
 int				run_simulation(struct s_params *params,

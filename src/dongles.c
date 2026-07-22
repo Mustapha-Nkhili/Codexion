@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/16 19:04:17 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/22 04:36:24 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/23 00:38:50 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ long long	get_next_ticket(t_ticket_counter *counter)
 }
 
 void	acquire_dongle(t_coder *coder, t_dongle *dongle,
-			t_ticket_counter *counter)
+			t_ticket_counter *counter, t_sim_state *sim_state)
 {
 	t_request		request;
 	t_scheduler		scheduler;
@@ -34,8 +34,10 @@ void	acquire_dongle(t_coder *coder, t_dongle *dongle,
 
 	scheduler = coder->params->scheduler;
 	request.coder_id = coder->id;
+	pthread_mutex_lock(&coder->lock);
 	request.deadline = coder->last_compile_start
 		+ coder->params->time_to_burnout;
+	pthread_mutex_unlock(&coder->lock);
 	request.arrival_order = get_next_ticket(counter);
 	pthread_mutex_lock(&dongle->lock);
 	heap_insert(dongle->waiters, request, &dongle->waiters_len, scheduler);
@@ -46,6 +48,11 @@ void	acquire_dongle(t_coder *coder, t_dongle *dongle,
 		deadline_ts = ms_to_timespec(dongle->free_at);
 		pthread_cond_timedwait(&dongle->cond, &dongle->lock, &deadline_ts);
 		is_coder_min = (dongle->waiters[0].coder_id == coder->id);
+		if (is_sim_should_stop(sim_state))
+		{
+			pthread_mutex_unlock(&dongle->lock);
+			return ;
+		}
 	}
 	dongle->available = 0;
 	heap_extract_min(dongle->waiters, &dongle->waiters_len, scheduler,
@@ -62,29 +69,37 @@ void	release_dongle(t_dongle *dongle, int dongle_cooldown)
 	pthread_mutex_unlock(&dongle->lock);
 }
 
-void	acquire_both_dongles(t_coder *coder, t_dongle *dongles,
-			t_ticket_counter *counter, t_logger *logger)
+void	acquire_both_dongles(t_coder_args *args)
 {
 	int	left;
 	int	right;
 	int	number_of_coders;
 
-	number_of_coders = coder->params->number_of_coders;
-	left = get_left_dongle_index(coder->id, number_of_coders);
-	right = get_right_dongle_index(coder->id);
+
+	number_of_coders = args->coder->params->number_of_coders;
+	left = get_left_dongle_index(args->coder->id, number_of_coders);
+	right = get_right_dongle_index(args->coder->id);
 	if (left < right)
 	{
-		acquire_dongle(coder, &dongles[left], counter);
-		log_taken_dongle(logger, coder->id);
-		acquire_dongle(coder, &dongles[right], counter);
-		log_taken_dongle(logger, coder->id);
+		acquire_dongle(args->coder, &args->dongles[left], args->ticket_counter, args->sim_state);
+		if (is_sim_should_stop(args->sim_state))
+			return ;
+		log_taken_dongle(args->logger, args->coder->id);
+		acquire_dongle(args->coder, &args->dongles[right], args->ticket_counter, args->sim_state);
+		if (is_sim_should_stop(args->sim_state))
+			return ;
+		log_taken_dongle(args->logger, args->coder->id);
 	}
 	else
 	{
-		acquire_dongle(coder, &dongles[right], counter);
-		log_taken_dongle(logger, coder->id);
-		acquire_dongle(coder, &dongles[left], counter);
-		log_taken_dongle(logger, coder->id);
+		acquire_dongle(args->coder, &args->dongles[right], args->ticket_counter, args->sim_state);
+		if (is_sim_should_stop(args->sim_state))
+			return ;
+		log_taken_dongle(args->logger, args->coder->id);
+		acquire_dongle(args->coder, &args->dongles[left], args->ticket_counter, args->sim_state);
+		if (is_sim_should_stop(args->sim_state))
+			return ;
+		log_taken_dongle(args->logger, args->coder->id);
 	}
 }
 
