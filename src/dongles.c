@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/16 19:04:17 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/23 00:38:50 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/23 04:22:14 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,32 +31,36 @@ void	acquire_dongle(t_coder *coder, t_dongle *dongle,
 	t_scheduler		scheduler;
 	int				is_coder_min;
 	struct timespec	deadline_ts;
+	long long		now;
+	long long		wake_at;
 
 	scheduler = coder->params->scheduler;
 	request.coder_id = coder->id;
 	pthread_mutex_lock(&coder->lock);
-	request.deadline = coder->last_compile_start
-		+ coder->params->time_to_burnout;
+	request.deadline = coder->last_compile_start + coder->params->time_to_burnout;
 	pthread_mutex_unlock(&coder->lock);
 	request.arrival_order = get_next_ticket(counter);
 	pthread_mutex_lock(&dongle->lock);
 	heap_insert(dongle->waiters, request, &dongle->waiters_len, scheduler);
 	is_coder_min = (dongle->waiters[0].coder_id == coder->id);
-	while (!dongle->available || get_timestamp_ms() < dongle->free_at
-		|| !is_coder_min)
+	while ((!dongle->available || get_timestamp_ms() < dongle->free_at
+			|| !is_coder_min) && !is_sim_should_stop(sim_state))
 	{
-		deadline_ts = ms_to_timespec(dongle->free_at);
+		now = get_timestamp_ms();
+		wake_at = dongle->free_at;
+		if (wake_at <= now)
+			wake_at = now + 5;
+		deadline_ts = ms_to_timespec(wake_at);
 		pthread_cond_timedwait(&dongle->cond, &dongle->lock, &deadline_ts);
 		is_coder_min = (dongle->waiters[0].coder_id == coder->id);
-		if (is_sim_should_stop(sim_state))
-		{
-			pthread_mutex_unlock(&dongle->lock);
-			return ;
-		}
+	}
+	if (is_sim_should_stop(sim_state))
+	{
+		pthread_mutex_unlock(&dongle->lock);
+		return ;
 	}
 	dongle->available = 0;
-	heap_extract_min(dongle->waiters, &dongle->waiters_len, scheduler,
-		&request);
+	heap_extract_min(dongle->waiters, &dongle->waiters_len, scheduler, &request);
 	pthread_mutex_unlock(&dongle->lock);
 }
 
