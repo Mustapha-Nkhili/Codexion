@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/23 00:38:22 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/23 06:54:41 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,5 +174,9 @@ void			mark_sim_burnout(t_sim_state *sim);
 void			*coder_routine(void *a);
 void			*monitor_routine_wrapper(void *arg);
 int				handle_error(const char *err_source, const char *err_msg);
+t_request	build_request(t_coder *coder, t_ticket_counter *counter);
+int	      wait_for_turn(t_dongle *dongle, int coder_id,
+				    t_sim_state *sim_state);
+long long	get_next_ticket(t_ticket_counter *counter);
 
 #endif

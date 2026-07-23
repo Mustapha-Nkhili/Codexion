@@ -6,61 +6,31 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/16 19:04:17 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/23 04:22:14 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/23 06:59:40 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <pthread.h>
 #include "codexion.h"
 
-long long	get_next_ticket(t_ticket_counter *counter)
-{
-	long long	next_ticket;
-
-	pthread_mutex_lock(&counter->lock);
-	counter->next_ticket++;
-	next_ticket = counter->next_ticket;
-	pthread_mutex_unlock(&counter->lock);
-	return (next_ticket);
-}
-
 void	acquire_dongle(t_coder *coder, t_dongle *dongle,
 			t_ticket_counter *counter, t_sim_state *sim_state)
 {
-	t_request		request;
-	t_scheduler		scheduler;
-	int				is_coder_min;
-	struct timespec	deadline_ts;
-	long long		now;
-	long long		wake_at;
+	t_request	request;
+	t_scheduler	scheduler;
 
 	scheduler = coder->params->scheduler;
-	request.coder_id = coder->id;
-	pthread_mutex_lock(&coder->lock);
-	request.deadline = coder->last_compile_start + coder->params->time_to_burnout;
-	pthread_mutex_unlock(&coder->lock);
-	request.arrival_order = get_next_ticket(counter);
+	request = build_request(coder, counter);
 	pthread_mutex_lock(&dongle->lock);
 	heap_insert(dongle->waiters, request, &dongle->waiters_len, scheduler);
-	is_coder_min = (dongle->waiters[0].coder_id == coder->id);
-	while ((!dongle->available || get_timestamp_ms() < dongle->free_at
-			|| !is_coder_min) && !is_sim_should_stop(sim_state))
-	{
-		now = get_timestamp_ms();
-		wake_at = dongle->free_at;
-		if (wake_at <= now)
-			wake_at = now + 5;
-		deadline_ts = ms_to_timespec(wake_at);
-		pthread_cond_timedwait(&dongle->cond, &dongle->lock, &deadline_ts);
-		is_coder_min = (dongle->waiters[0].coder_id == coder->id);
-	}
-	if (is_sim_should_stop(sim_state))
+	if (wait_for_turn(dongle, coder->id, sim_state))
 	{
 		pthread_mutex_unlock(&dongle->lock);
 		return ;
 	}
 	dongle->available = 0;
-	heap_extract_min(dongle->waiters, &dongle->waiters_len, scheduler, &request);
+	heap_extract_min(dongle->waiters, &dongle->waiters_len, scheduler,
+		&request);
 	pthread_mutex_unlock(&dongle->lock);
 }
 
@@ -73,37 +43,36 @@ void	release_dongle(t_dongle *dongle, int dongle_cooldown)
 	pthread_mutex_unlock(&dongle->lock);
 }
 
+static int	acquire_one_dongle(t_coder_args *args, int index)
+{
+	acquire_dongle(args->coder, &args->dongles[index],
+		args->ticket_counter, args->sim_state);
+	if (is_sim_should_stop(args->sim_state))
+		return (1);
+	log_taken_dongle(args->logger, args->coder->id);
+	return (0);
+}
+
 void	acquire_both_dongles(t_coder_args *args)
 {
 	int	left;
 	int	right;
 	int	number_of_coders;
 
-
 	number_of_coders = args->coder->params->number_of_coders;
 	left = get_left_dongle_index(args->coder->id, number_of_coders);
 	right = get_right_dongle_index(args->coder->id);
 	if (left < right)
 	{
-		acquire_dongle(args->coder, &args->dongles[left], args->ticket_counter, args->sim_state);
-		if (is_sim_should_stop(args->sim_state))
+		if (acquire_one_dongle(args, left))
 			return ;
-		log_taken_dongle(args->logger, args->coder->id);
-		acquire_dongle(args->coder, &args->dongles[right], args->ticket_counter, args->sim_state);
-		if (is_sim_should_stop(args->sim_state))
-			return ;
-		log_taken_dongle(args->logger, args->coder->id);
+		acquire_one_dongle(args, right);
 	}
 	else
 	{
-		acquire_dongle(args->coder, &args->dongles[right], args->ticket_counter, args->sim_state);
-		if (is_sim_should_stop(args->sim_state))
+		if (acquire_one_dongle(args, right))
 			return ;
-		log_taken_dongle(args->logger, args->coder->id);
-		acquire_dongle(args->coder, &args->dongles[left], args->ticket_counter, args->sim_state);
-		if (is_sim_should_stop(args->sim_state))
-			return ;
-		log_taken_dongle(args->logger, args->coder->id);
+		acquire_one_dongle(args, left);
 	}
 }
 
