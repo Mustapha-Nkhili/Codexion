@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/25 01:21:15 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/25 06:30:37 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,5 +177,7 @@ long long		get_next_ticket(t_ticket_counter *counter);
 int				free_sim_ressources(t_sim_variables *sim_vars,
 					t_sim_state *sim_state, t_logger *logger,
 					int number_of_coders);
+void			init_sim_vars(t_sim_variables *sim_vars, t_sim_state *sim_state,
+					t_monitor_args *monitor_args, pthread_t *monitor_thread);
 
 #endif
