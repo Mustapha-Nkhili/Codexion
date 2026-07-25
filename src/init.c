@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 11:14:51 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/21 17:42:17 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/24 23:42:53 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,18 @@ void	init_coders(t_coder *coders, struct s_params *params,
 		coders[i].compile_count = 0;
 		coders[i].params = params;
 		pthread_mutex_init(&coders[i].lock, NULL);
+		i++;
+	}
+}
+
+void	destroy_coders(t_coder *coders, int number_of_coders)
+{
+	int	i;
+
+	i = 0;
+	while (i < number_of_coders)
+	{
+		pthread_mutex_destroy(&coders[i].lock);
 		i++;
 	}
 }

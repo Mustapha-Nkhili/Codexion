@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/23 06:54:41 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/25 01:21:15 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,12 +147,10 @@ long long		get_timestamp_ms(void);
 void			init_err_msgs(const char *err_msgs[]);
 void			init_coders(t_coder *coders, struct s_params *params,
 					long long sim_start);
+void			destroy_coders(t_coder *coders, int number_of_coders);
 int				init_dongles(t_dongle *dongles, int number_of_coders,
 					long long sim_start);
 void			destroy_dongles(t_dongle *dongles, int dongles_nbr);
-// void			acquire_dongle(t_coder *coder, t_dongle *dongle,
-// 					t_ticket_counter *counter);
-// void			release_dongle(t_dongle *dongle, int dongle_cooldown);
 void			log_state(t_logger *logger, int coder_id,
 					t_coder_state state);
 void			log_taken_dongle(t_logger *logger, int coder_id);
@@ -160,8 +158,6 @@ void			log_burnout(t_logger *logger, int coder_id);
 int				get_left_dongle_index(int coder_id, int number_of_coders);
 int				get_right_dongle_index(int coder_id);
 struct timespec	ms_to_timespec(long long ms);
-// void			acquire_both_dongles(t_coder *coder, t_dongle *dongles,
-// 					t_ticket_counter *counter, t_logger *logger);
 void			acquire_both_dongles(t_coder_args *args);
 void			release_both_dongles(t_coder *coder, t_dongle *dongles,
 					int dongle_cooldown);
@@ -174,9 +170,12 @@ void			mark_sim_burnout(t_sim_state *sim);
 void			*coder_routine(void *a);
 void			*monitor_routine_wrapper(void *arg);
 int				handle_error(const char *err_source, const char *err_msg);
-t_request	build_request(t_coder *coder, t_ticket_counter *counter);
-int	      wait_for_turn(t_dongle *dongle, int coder_id,
-				    t_sim_state *sim_state);
-long long	get_next_ticket(t_ticket_counter *counter);
+t_request		build_request(t_coder *coder, t_ticket_counter *counter);
+int				wait_for_turn(t_dongle *dongle, int coder_id,
+					t_sim_state *sim_state);
+long long		get_next_ticket(t_ticket_counter *counter);
+int				free_sim_ressources(t_sim_variables *sim_vars,
+					t_sim_state *sim_state, t_logger *logger,
+					int number_of_coders);
 
 #endif

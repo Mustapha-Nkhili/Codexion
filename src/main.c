@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/02 17:32:39 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/22 00:42:07 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/25 01:02:54 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,8 +52,15 @@ int	main(int argc, char *argv[])
 	init_err_msgs(err_msgs);
 	params = parse_args(argc, argv);
 	if (params.err_code != ERR_NONE)
+	{
+		pthread_mutex_destroy(&ticket_counter.lock);
 		return (handle_error(params.err_arg, err_msgs[params.err_code]));
+	}
 	if (run_simulation(&params, &ticket_counter) != 0)
+	{
+		pthread_mutex_destroy(&ticket_counter.lock);
 		return (1);
+	}
+	pthread_mutex_destroy(&ticket_counter.lock);
 	return (0);
 }

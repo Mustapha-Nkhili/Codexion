@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/21 19:32:28 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/22 04:45:49 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/25 01:19:13 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,19 +95,24 @@ int	run_simulation(struct s_params *params, t_ticket_counter *ticket_counter)
 	sim_vars.sim_state = &sim_state;
 	sim_vars.monitor_args = &monitor_args;
 	sim_vars.monitor_thread = &monitor_thread;
+	sim_vars.coders = NULL;
+	sim_vars.dongles = NULL;
+	sim_vars.threads = NULL;
+	sim_vars.coder_args = NULL;
 	pthread_mutex_init(&logger.lock, NULL);
 	if (setup_simulation(params, &sim_vars, &sim_state, &logger) != 0)
-		return (1);
+		return  (free_sim_ressources(&sim_vars, NULL, &logger, params->number_of_coders));
 	sim_vars.coder_args = malloc(
 			params->number_of_coders * sizeof(t_coder_args));
 	if (sim_vars.coder_args == NULL)
+	{
+		free_sim_ressources(&sim_vars, &sim_state, &logger, params->number_of_coders);
 		return (handle_error(NULL, "failed to allocate coders args"));
+	}
 	create_threads(params, ticket_counter, &sim_vars, &logger);
 	join_threads(params->number_of_coders, sim_vars.threads, monitor_thread);
-	free(sim_vars.coders);
-	free(sim_vars.dongles);
-	free(sim_vars.threads);
-	free(sim_vars.coder_args);
-	pthread_mutex_destroy(&logger.lock);
+	destroy_coders(sim_vars.coders, params->number_of_coders);
+	destroy_dongles(sim_vars.dongles, params->number_of_coders);
+	free_sim_ressources(&sim_vars, &sim_state, &logger, params->number_of_coders);
 	return (0);
 }
