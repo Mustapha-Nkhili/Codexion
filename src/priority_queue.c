@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/09 10:56:14 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/13 16:44:14 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/28 02:13:08 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,18 +33,6 @@ static void	heapify(t_request array[], int len, int i, t_scheduler scheduler)
 			break ;
 		swap(&array[i], &array[smallest]);
 		i = smallest;
-	}
-}
-
-void	build_heap(t_request arr[], int n, t_scheduler scheduler)
-{
-	int	i;
-
-	i = (n / 2) - 1;
-	while (i >= 0)
-	{
-		heapify(arr, n, i, scheduler);
-		i--;
 	}
 }
 

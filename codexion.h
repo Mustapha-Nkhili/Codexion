@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/25 06:30:37 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/28 02:12:52 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,7 +135,6 @@ typedef struct s_sim_variables
 struct s_params	parse_args(int args_len, char *argv[]);
 long			ft_atol(const char *str);
 int				is_whitespace(char c);
-void			build_heap(t_request arr[], int n, t_scheduler scheduler);
 int				heap_insert(t_request *array, t_request new_req, int *len,
 					t_scheduler scheduler);
 int				heap_extract_min(t_request *min_heap, int *len,
