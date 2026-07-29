@@ -6,98 +6,130 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/16 19:04:17 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/25 02:00:09 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/29 06:51:20 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <pthread.h>
 #include "codexion.h"
 
-static int	acquire_dongle(t_coder *coder, t_dongle *dongle,
-			t_ticket_counter *counter, t_sim_state *sim_state)
+static void	release_dongle(t_dongle *dongle, int dongle_cooldown)
+{
+	dongle->available = 1;
+	dongle->free_at = get_timestamp_ms() + dongle_cooldown;
+}
+
+void	release_both_dongles(t_coder_args *args,
+			int dongle_cooldown)
+{
+	int	left;
+	int	right;
+
+	left = get_left_dongle_index(args->coder->id,
+			args->coder->params->number_of_coders);
+	right = get_right_dongle_index(args->coder->id);
+	pthread_mutex_lock(&args->sim_state->lock);
+	release_dongle(&args->dongles[left], dongle_cooldown);
+	release_dongle(&args->dongles[right], dongle_cooldown);
+	pthread_cond_broadcast(&args->sim_state->cond);
+	pthread_mutex_unlock(&args->sim_state->lock);
+}
+
+static int	can_acquire_both_dongles(t_coder *coder, t_dongle *dongles, int left, int right)
+{
+    long long current_time;
+
+    if (left == right)
+        return (0);
+
+    current_time = get_timestamp_ms();
+    if (!dongles[left].available || !dongles[right].available)
+        return (0);
+    if (current_time < dongles[left].free_at || current_time < dongles[right].free_at)
+        return (0);
+
+    if (dongles[left].waiters_len == 0 || dongles[left].waiters[0].coder_id != coder->id)
+        return (0);
+    if (dongles[right].waiters_len == 0 || dongles[right].waiters[0].coder_id != coder->id)
+        return (0);
+
+    return (1);
+}
+
+static void	push_dongles_internal(t_coder *coder, t_ticket_counter *counter,
+			t_dongle *dongles, int left, int right)
 {
 	t_request	request;
 	t_scheduler	scheduler;
 
 	scheduler = coder->params->scheduler;
 	request = build_request(coder, counter);
-	pthread_mutex_lock(&dongle->lock);
-	heap_insert(dongle->waiters, request, &dongle->waiters_len, scheduler);
-	if (wait_for_turn(dongle, coder->id, sim_state))
-	{
-		pthread_mutex_unlock(&dongle->lock);
-		return (1);
-	}
-	dongle->available = 0;
-	heap_extract_min(dongle->waiters, &dongle->waiters_len, scheduler,
-		&request);
-	pthread_mutex_unlock(&dongle->lock);
-	return (0);
+	heap_insert(dongles[left].waiters, request, &dongles[left].waiters_len,
+		scheduler);
+	heap_insert(dongles[right].waiters, request, &dongles[right].waiters_len,
+		scheduler);
 }
 
-void	release_dongle(t_dongle *dongle, int dongle_cooldown)
+int	acquire_both_dongles(t_coder_args *args)
 {
-	pthread_mutex_lock(&dongle->lock);
-	dongle->available = 1;
-	dongle->free_at = get_timestamp_ms() + dongle_cooldown;
-	pthread_cond_broadcast(&dongle->cond);
-	pthread_mutex_unlock(&dongle->lock);
-}
+    int left;
+    int right;
+    int number_of_coders;
+    long long now;
+    long long wake_at;
+	long long deadline;
+    struct timespec deadline_ts;
 
-static int	acquire_one_dongle(t_coder_args *args, int index)
-{
-	int	dongle_cooldown;
+    number_of_coders = args->coder->params->number_of_coders;
+    left = get_left_dongle_index(args->coder->id, number_of_coders);
+    right = get_right_dongle_index(args->coder->id);
 
-	dongle_cooldown = args->coder->params->dongle_cooldown;
-	if (acquire_dongle(args->coder, &args->dongles[index],
-			args->ticket_counter, args->sim_state))
-		return (1);
-	if (is_sim_should_stop(args->sim_state))
-	{
-		release_dongle(&args->dongles[index], dongle_cooldown);
-		return (1);
-	}
-	log_taken_dongle(args->logger, args->coder->id);
-	return (0);
-}
+	pthread_mutex_lock(&args->coder->lock);
+	deadline = args->coder->last_compile_start
+		+ args->coder->params->time_to_burnout;
+	pthread_mutex_unlock(&args->coder->lock);
 
-void	acquire_both_dongles(t_coder_args *args)
-{
-	int	left;
-	int	right;
-	int	number_of_coders;
-	int	dongle_cooldown;
+	pthread_mutex_lock(&args->sim_state->lock);
 
-	dongle_cooldown = args->coder->params->dongle_cooldown;
-	number_of_coders = args->coder->params->number_of_coders;
-	left = get_left_dongle_index(args->coder->id, number_of_coders);
-	right = get_right_dongle_index(args->coder->id);
-	if (left < right)
-	{
-		if (acquire_one_dongle(args, left) == 1)
-			return ;
-		if (acquire_one_dongle(args, right) == 1)
-			release_dongle(&args->dongles[left], dongle_cooldown);
-	}
+    push_dongles_internal(args->coder, args->ticket_counter, args->dongles, left, right);
+
+	while (!can_acquire_both_dongles(args->coder, args->dongles, left, right)
+		&& !args->sim_state->stop && get_timestamp_ms() < deadline)
+    {
+        now = get_timestamp_ms();
+        wake_at = args->dongles[left].free_at;
+        if (args->dongles[right].free_at > wake_at)
+            wake_at = args->dongles[right].free_at;
+
+        if (wake_at <= now)
+            wake_at = now + 5;
+
+        deadline_ts = ms_to_timespec(wake_at);
+        pthread_cond_timedwait(&args->sim_state->cond, 
+                               &args->sim_state->lock, 
+                               &deadline_ts);
+    }
+
+	if (can_acquire_both_dongles(args->coder, args->dongles, left, right)
+		&& !args->sim_state->stop && get_timestamp_ms() < deadline)
+    {
+		t_request	request;
+
+		heap_extract_min(args->dongles[left].waiters, &args->dongles[left].waiters_len, args->coder->params->scheduler,
+			&request);
+		heap_extract_min(args->dongles[right].waiters, &args->dongles[right].waiters_len, args->coder->params->scheduler,
+			&request);
+
+        args->dongles[left].available = 0;
+        args->dongles[right].available = 0;
+		log_taken_dongle(args->logger, args->coder->id);
+		log_taken_dongle(args->logger, args->coder->id);
+    }
 	else
-	{
-		if (acquire_one_dongle(args, right) == 1)
-			return ;
-		if (acquire_one_dongle(args, left) == 1)
-			release_dongle(&args->dongles[right], dongle_cooldown);
+    {
+		pthread_mutex_unlock(&args->sim_state->lock);
+		return (1);
 	}
-}
-
-void	release_both_dongles(t_coder *coder, t_dongle *dongles,
-			int dongle_cooldown)
-{
-	int	left;
-	int	right;
-	int	number_of_coders;
-
-	number_of_coders = coder->params->number_of_coders;
-	left = get_left_dongle_index(coder->id, number_of_coders);
-	right = get_right_dongle_index(coder->id);
-	release_dongle(&dongles[left], dongle_cooldown);
-	release_dongle(&dongles[right], dongle_cooldown);
+    pthread_mutex_unlock(&args->sim_state->lock);
+	return (0);
 }
