@@ -6,10 +6,11 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 11:28:40 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/12 16:01:28 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/31 18:31:42 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <limits.h>
 #include "codexion.h"
 
 int	is_whitespace(char c)

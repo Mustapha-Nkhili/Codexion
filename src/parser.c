@@ -6,10 +6,11 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/02 18:11:19 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/14 11:24:51 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/31 18:31:24 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <limits.h>
 #include "codexion.h"
 
 static int	is_valid_number(const char *str)
@@ -68,6 +69,12 @@ static int	validate_coders_nbr(const char *str_nbr, int *number,
 	if (*number == 0)
 	{
 		params->err_code = ERR_NOT_POSITIVE;
+		params->err_arg = "number of coders";
+		return (0);
+	}
+	if (*number > 3000)
+	{
+		params->err_code = ERR_RANGE;
 		params->err_arg = "number of coders";
 		return (0);
 	}
