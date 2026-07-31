@@ -6,21 +6,12 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/18 03:21:54 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/31 04:33:18 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/31 11:25:04 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <pthread.h>
 #include "codexion.h"
-
-void	init_sim(t_sim_state *sim, int number_of_coders)
-{
-	pthread_mutex_init(&sim->lock, NULL);
-	pthread_cond_init(&sim->cond, NULL);
-	sim->stop = 0;
-	sim->finished_count = 0;
-	sim->number_of_coders = number_of_coders;
-}
 
 int	free_sim_ressources(t_sim_variables *sim_vars,
 		t_sim_state *sim_state, t_logger *logger)

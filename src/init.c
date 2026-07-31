@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 11:14:51 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/31 09:21:01 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/31 11:24:12 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,4 +54,13 @@ void	init_dongles(t_dongle *dongles, int number_of_coders,
 		dongles[i].waiters_len = 0;
 		i++;
 	}
+}
+
+void	init_sim(t_sim_state *sim, int number_of_coders)
+{
+	pthread_mutex_init(&sim->lock, NULL);
+	pthread_cond_init(&sim->cond, NULL);
+	sim->stop = 0;
+	sim->finished_count = 0;
+	sim->number_of_coders = number_of_coders;
 }
