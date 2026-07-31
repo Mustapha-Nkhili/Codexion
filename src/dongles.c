@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/16 19:04:17 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/30 04:28:24 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/31 10:14:22 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,11 +99,9 @@ int	acquire_both_dongles(t_coder_args *args)
 	left = get_left_dongle_index(args->coder->id,
 			args->coder->params->number_of_coders);
 	right = get_right_dongle_index(args->coder->id);
-	pthread_mutex_lock(&args->coder->lock);
+	pthread_mutex_lock(&args->sim_state->lock);
 	deadline = args->coder->last_compile_start
 		+ args->coder->params->time_to_burnout;
-	pthread_mutex_unlock(&args->coder->lock);
-	pthread_mutex_lock(&args->sim_state->lock);
 	push_dongles(args->coder, args->ticket_counter, args->dongles);
 	wait_for_dongles(args, left, right, deadline);
 	if (can_acquire_both_dongles(args->coder, args->dongles, left, right)

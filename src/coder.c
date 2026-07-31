@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/19 21:41:56 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/29 06:43:55 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/31 09:58:35 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,23 +16,27 @@
 
 static int	compile_phase(t_coder_args *arg, struct s_params *params)
 {
+	int	finished;
+
 	arg->coder->state = STATE_WAITING_FOR_DONGLES;
 	if (is_sim_should_stop(arg->sim_state))
 		return (1);
 	if (acquire_both_dongles(arg))
 		return (1);
-	pthread_mutex_lock(&arg->coder->lock);
+	pthread_mutex_lock(&arg->sim_state->lock);
 	arg->coder->last_compile_start = get_timestamp_ms();
-	pthread_mutex_unlock(&arg->coder->lock);
+	pthread_mutex_unlock(&arg->sim_state->lock);
 	arg->coder->state = STATE_COMPILING;
 	log_state(arg->logger, arg->coder->id, STATE_COMPILING);
 	usleep(params->time_to_compile * 1000);
 	release_both_dongles(arg, params->dongle_cooldown);
-	pthread_mutex_lock(&arg->coder->lock);
+	pthread_mutex_lock(&arg->sim_state->lock);
 	arg->coder->compile_count++;
-	if (arg->coder->compile_count == params->number_of_compiles_required)
+	finished = arg->coder->compile_count
+		== params->number_of_compiles_required;
+	pthread_mutex_unlock(&arg->sim_state->lock);
+	if (finished)
 		mark_coder_finished_sim(arg->sim_state);
-	pthread_mutex_unlock(&arg->coder->lock);
 	return (0);
 }
 

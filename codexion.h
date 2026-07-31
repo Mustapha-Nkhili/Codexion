@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/30 03:03:15 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/31 09:59:16 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,6 @@ typedef struct s_coder
 	t_coder_state	state;
 	int				compile_count;
 	struct s_params	*params;
-	pthread_mutex_t	lock;
 }	t_coder;
 
 typedef struct s_request
@@ -78,8 +77,6 @@ typedef struct s_dongle
 	int				id;
 	int				available;
 	long long		free_at;
-	pthread_mutex_t	lock;
-	pthread_cond_t	cond;
 	t_request		waiters[2];
 	int				waiters_len;
 }	t_dongle;
@@ -147,10 +144,8 @@ long long		get_timestamp_ms(void);
 void			init_err_msgs(const char *err_msgs[]);
 void			init_coders(t_coder *coders, struct s_params *params,
 					long long sim_start);
-void			destroy_coders(t_coder *coders, int number_of_coders);
-int				init_dongles(t_dongle *dongles, int number_of_coders,
+void			init_dongles(t_dongle *dongles, int number_of_coders,
 					long long sim_start);
-void			destroy_dongles(t_dongle *dongles, int dongles_nbr);
 void			log_state(t_logger *logger, int coder_id,
 					t_coder_state state);
 void			log_taken_dongle(t_logger *logger, int coder_id);
@@ -172,8 +167,7 @@ int				handle_error(const char *err_source, const char *err_msg);
 t_request		build_request(t_coder *coder, t_ticket_counter *counter);
 long long		get_next_ticket(t_ticket_counter *counter);
 int				free_sim_ressources(t_sim_variables *sim_vars,
-					t_sim_state *sim_state, t_logger *logger,
-					int number_of_coders);
+					t_sim_state *sim_state, t_logger *logger);
 void			init_sim_vars(t_sim_variables *sim_vars, t_sim_state *sim_state,
 					t_monitor_args *monitor_args, pthread_t *monitor_thread);
 
