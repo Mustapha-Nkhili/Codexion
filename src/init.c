@@ -64,3 +64,15 @@ void	init_sim(t_sim_state *sim, int number_of_coders)
 	sim->finished_count = 0;
 	sim->number_of_coders = number_of_coders;
 }
+
+void	init_sim_vars(t_sim_variables *sim_vars, t_sim_state *sim_state,
+			t_monitor_args *monitor_args, pthread_t *monitor_thread)
+{
+	sim_vars->sim_state = sim_state;
+	sim_vars->monitor_args = monitor_args;
+	sim_vars->monitor_thread = monitor_thread;
+	sim_vars->coders = NULL;
+	sim_vars->dongles = NULL;
+	sim_vars->threads = NULL;
+	sim_vars->coder_args = NULL;
+}
