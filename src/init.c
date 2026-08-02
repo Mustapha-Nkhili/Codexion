@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/14 11:14:51 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/24 23:42:53 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/31 11:24:12 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,24 +36,12 @@ void	init_coders(t_coder *coders, struct s_params *params,
 		coders[i].state = STATE_WAITING_FOR_DONGLES;
 		coders[i].compile_count = 0;
 		coders[i].params = params;
-		pthread_mutex_init(&coders[i].lock, NULL);
 		i++;
 	}
 }
 
-void	destroy_coders(t_coder *coders, int number_of_coders)
-{
-	int	i;
-
-	i = 0;
-	while (i < number_of_coders)
-	{
-		pthread_mutex_destroy(&coders[i].lock);
-		i++;
-	}
-}
-
-int	init_dongles(t_dongle *dongles, int number_of_coders, long long sim_start)
+void	init_dongles(t_dongle *dongles, int number_of_coders,
+			long long sim_start)
 {
 	int	i;
 
@@ -64,31 +52,27 @@ int	init_dongles(t_dongle *dongles, int number_of_coders, long long sim_start)
 		dongles[i].available = 1;
 		dongles[i].free_at = sim_start;
 		dongles[i].waiters_len = 0;
-		if (pthread_mutex_init(&dongles[i].lock, NULL) != 0)
-		{
-			destroy_dongles(dongles, i);
-			return (1);
-		}
-		if (pthread_cond_init(&dongles[i].cond, NULL) != 0)
-		{
-			pthread_mutex_destroy(&dongles[i].lock);
-			destroy_dongles(dongles, i);
-			return (1);
-		}
 		i++;
 	}
-	return (0);
 }
 
-void	destroy_dongles(t_dongle *dongles, int dongles_nbr)
+void	init_sim(t_sim_state *sim, int number_of_coders)
 {
-	int	i;
+	pthread_mutex_init(&sim->lock, NULL);
+	pthread_cond_init(&sim->cond, NULL);
+	sim->stop = 0;
+	sim->finished_count = 0;
+	sim->number_of_coders = number_of_coders;
+}
 
-	i = 0;
-	while (i < dongles_nbr)
-	{
-		pthread_mutex_destroy(&dongles[i].lock);
-		pthread_cond_destroy(&dongles[i].cond);
-		i++;
-	}
+void	init_sim_vars(t_sim_variables *sim_vars, t_sim_state *sim_state,
+			t_monitor_args *monitor_args, pthread_t *monitor_thread)
+{
+	sim_vars->sim_state = sim_state;
+	sim_vars->monitor_args = monitor_args;
+	sim_vars->monitor_thread = monitor_thread;
+	sim_vars->coders = NULL;
+	sim_vars->dongles = NULL;
+	sim_vars->threads = NULL;
+	sim_vars->coder_args = NULL;
 }

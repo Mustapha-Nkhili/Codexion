@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/21 19:32:28 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/25 07:19:04 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/31 09:19:41 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,8 @@ static int	allocate_resources(struct s_params *params,
 	sim_vars->dongles = malloc(params->number_of_coders * sizeof(t_dongle));
 	if (sim_vars->dongles == NULL)
 		return (handle_error(NULL, "failed to allocate dongles"));
-	if (init_dongles(sim_vars->dongles, params->number_of_coders,
-			get_timestamp_ms()) != 0)
-		return (handle_error(NULL, "initialisation of dongles failed"));
+	init_dongles(sim_vars->dongles, params->number_of_coders,
+		get_timestamp_ms());
 	sim_vars->threads = malloc(params->number_of_coders * sizeof(pthread_t));
 	if (sim_vars->threads == NULL)
 		return (handle_error(NULL, "failed to allocate coders threads"));
@@ -95,19 +94,16 @@ int	run_simulation(struct s_params *params, t_ticket_counter *ticket_counter)
 	init_sim_vars(&sim_vars, &sim_state, &monitor_args, &monitor_thread);
 	pthread_mutex_init(&logger.lock, NULL);
 	if (setup_simulation(params, &sim_vars, &sim_state, &logger) != 0)
-		return (free_sim_ressources(&sim_vars, NULL, &logger,
-				params->number_of_coders));
+		return (free_sim_ressources(&sim_vars, NULL, &logger));
 	sim_vars.coder_args = malloc(
 			params->number_of_coders * sizeof(t_coder_args));
 	if (sim_vars.coder_args == NULL)
 	{
-		free_sim_ressources(&sim_vars, &sim_state, &logger,
-			params->number_of_coders);
+		free_sim_ressources(&sim_vars, &sim_state, &logger);
 		return (handle_error(NULL, "failed to allocate coders args"));
 	}
 	create_threads(params, ticket_counter, &sim_vars, &logger);
 	join_threads(params->number_of_coders, sim_vars.threads, monitor_thread);
-	free_sim_ressources(&sim_vars, &sim_state, &logger,
-		params->number_of_coders);
+	free_sim_ressources(&sim_vars, &sim_state, &logger);
 	return (0);
 }

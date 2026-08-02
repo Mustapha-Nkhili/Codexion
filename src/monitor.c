@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/20 02:28:29 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/22 04:36:04 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/07/31 10:00:10 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,16 +19,15 @@ static int	check_coder_burnout(t_coder *coder, t_sim_state *sim_state,
 {
 	long long	deadline;
 
-	pthread_mutex_lock(&coder->lock);
+	pthread_mutex_lock(&sim_state->lock);
 	deadline = coder->last_compile_start + coder->params->time_to_burnout;
+	pthread_mutex_unlock(&sim_state->lock);
 	if (get_timestamp_ms() >= deadline)
 	{
 		log_burnout(logger, coder->id);
 		mark_sim_burnout(sim_state);
-		pthread_mutex_unlock(&coder->lock);
 		return (1);
 	}
-	pthread_mutex_unlock(&coder->lock);
 	return (0);
 }
 
