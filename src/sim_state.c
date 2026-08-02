@@ -6,10 +6,11 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/18 03:21:54 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/31 11:25:04 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/08/02 17:24:32 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <stdlib.h>
 #include <pthread.h>
 #include "codexion.h"
 

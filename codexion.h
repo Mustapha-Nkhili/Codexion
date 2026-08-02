@@ -6,16 +6,14 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/03 15:54:31 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/31 18:31:52 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/08/02 17:23:56 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CODEXION_H
 # define CODEXION_H
 
-# include <stdio.h>
-# include <stdlib.h>
-# include <string.h>
+# include <pthread.h>
 
 typedef enum e_err
 {

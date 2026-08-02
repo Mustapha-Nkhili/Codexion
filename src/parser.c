@@ -6,10 +6,11 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/02 18:11:19 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/31 18:31:24 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/08/02 17:24:40 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <string.h>
 #include <limits.h>
 #include "codexion.h"
 

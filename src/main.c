@@ -6,10 +6,11 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/02 17:32:39 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/25 01:02:54 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/08/02 17:25:00 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <stdio.h>
 #include <sys/time.h>
 #include <pthread.h>
 #include "codexion.h"
