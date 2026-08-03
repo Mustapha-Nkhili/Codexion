@@ -26,7 +26,7 @@ static int	allocate_resources(struct s_params *params,
 	if (sim_vars->dongles == NULL)
 		return (handle_error(NULL, "failed to allocate dongles"));
 	init_dongles(sim_vars->dongles, params->number_of_coders,
-		get_timestamp_ms());
+		logger->sim_start_time);
 	sim_vars->threads = malloc(params->number_of_coders * sizeof(pthread_t));
 	if (sim_vars->threads == NULL)
 		return (handle_error(NULL, "failed to allocate coders threads"));
