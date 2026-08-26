@@ -6,7 +6,7 @@
 /*   By: mn-khili <mn-khili@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/19 21:41:56 by mn-khili          #+#    #+#             */
-/*   Updated: 2026/07/31 09:58:35 by mn-khili         ###   ########.fr       */
+/*   Updated: 2026/08/26 17:25:28 by mn-khili         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,8 @@ void	*coder_routine(void *a)
 
 	arg = (t_coder_args *)a;
 	params = arg->coder->params;
+	if (arg->coder->id % 2 != 0)
+		usleep(1500);
 	while (!is_sim_should_stop(arg->sim_state))
 	{
 		if (arg->coder->compile_count >= params->number_of_compiles_required)
